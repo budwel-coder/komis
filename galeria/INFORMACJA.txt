@@ -1,0 +1,1 @@
+Tutaj będą zapisywane zdjęcia samochodów podczas eksportu z panelu administratora.
