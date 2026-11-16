@@ -4,7 +4,7 @@ Pliki:
 - index.html       — podstrona Samochody (zachowana dotychczasowa wersja)
 - motocykle.html   — oddzielna podstrona Motocykle
 - inne.html        — oddzielna podstrona Inne
-- assets/scigacz.svg — grafika tła podstrony Motocykle
+- assets/scigacz.webp — fotograficzne tło podstrony Motocykle
 
 Wgraj wszystkie pliki i folder assets do tego samego repozytorium GitHub Pages.
 Nie zmieniaj nazw plików ani położenia folderu assets.
