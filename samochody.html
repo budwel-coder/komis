@@ -284,17 +284,33 @@ const vehicleCatalog={cars:{'Abarth':['500','595','695','124 Spider'],'Acura':['
 function setupVehicleCatalog(){
  const form=$('carForm'); if(!form)return;
  const make=form.elements.make, model=form.elements.model; if(!make||!model)return;
- make.setAttribute('list','vehicleMakes'); model.setAttribute('list','vehicleModels');
- let a=document.getElementById('vehicleMakes'),b=document.getElementById('vehicleModels');
- if(!a){a=document.createElement('datalist');a.id='vehicleMakes';make.insertAdjacentElement('afterend',a)}
- if(!b){b=document.createElement('datalist');b.id='vehicleModels';model.insertAdjacentElement('afterend',b)}
+ const lists={
+  cars:{makes:'vehicleMakesCars',models:'vehicleModelsCars'},
+  motorcycles:{makes:'vehicleMakesMotorcycles',models:'vehicleModelsMotorcycles'}
+ };
+ function ensureList(id,el){let node=document.getElementById(id);if(!node){node=document.createElement('datalist');node.id=id;el.insertAdjacentElement('afterend',node)}return node}
+ const datalists={};
+ Object.entries(lists).forEach(([kind,ids])=>{datalists[kind]={makes:ensureList(ids.makes,make),models:ensureList(ids.models,model)}});
  function kind(){return activeCategory==='motorcycles'?'motorcycles':'cars'}
- function fillMakes(){a.innerHTML=Object.keys(vehicleCatalog[kind()]).sort((x,y)=>x.localeCompare(y,'pl')).map(x=>`<option value="${x.replaceAll('&','&amp;').replaceAll('"','&quot;')}"></option>`).join('');fillModels()}
- function fillModels(){const key=Object.keys(vehicleCatalog[kind()]).find(x=>x.toLocaleLowerCase('pl')===make.value.trim().toLocaleLowerCase('pl'));const models=key?vehicleCatalog[kind()][key]:[];b.innerHTML=models.map(x=>`<option value="${x.replaceAll('&','&amp;').replaceAll('"','&quot;')}"></option>`).join('')}
- make.addEventListener('input',fillModels); make.addEventListener('change',fillModels);
- const oldOpenForm=openForm;
- window.openForm=function(car){oldOpenForm(car);fillMakes();if(car){make.value=car.make||'';model.value=car.model||'';fillModels()}};
- fillMakes();
+ function safeOption(value){return `<option value="${String(value).replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;')} "></option>`.replace(' "></option>','"></option>')}
+ function refreshCatalog(){
+  const selected=kind(),catalog=vehicleCatalog[selected]||{},list=datalists[selected];
+  make.setAttribute('list',lists[selected].makes);model.setAttribute('list',lists[selected].models);
+  Object.entries(datalists).forEach(([name,els])=>{if(name!==selected){els.makes.innerHTML='';els.models.innerHTML=''}});
+  list.makes.innerHTML=Object.keys(catalog).sort((a,b)=>a.localeCompare(b,'pl')).map(safeOption).join('');
+  const matched=Object.keys(catalog).find(x=>x.toLocaleLowerCase('pl')===make.value.trim().toLocaleLowerCase('pl'));
+  list.models.innerHTML=(matched?catalog[matched]:[]).map(safeOption).join('');
+ }
+ make.addEventListener('input',refreshCatalog);make.addEventListener('change',refreshCatalog);
+ const originalOpenForm=window.openForm;
+ window.openForm=function(car){
+  refreshCatalog();
+  originalOpenForm(car);
+  refreshCatalog();
+  if(car){make.value=car.make||'';model.value=car.model||'';refreshCatalog()}
+ };
+ window.refreshVehicleCatalog=refreshCatalog;
+ refreshCatalog();
 }
 
 function showDetail(id){const c=cars.find(x=>x.id===id);if(!c)return;const title=activeCategory==='other'?c.make:[c.make,c.model,c.version].filter(Boolean).join(' ');const specs=activeCategory==='cars'?[['Rok produkcji',c.year],['Przebieg',c.mileage?Number(c.mileage).toLocaleString('pl-PL')+' km':'—'],['Pojemność',c.capacity?c.capacity+' cm³':'—'],['Moc',c.power?c.power+' KM':'—'],['Paliwo',c.fuel],['Skrzynia biegów',c.gearbox],['Napęd',c.drive],['Nadwozie',c.body],['Kolor',c.color],['Drzwi',c.doors],['Pochodzenie',c.origin],['Pierwsza rejestracja',c.registration],['VIN',c.vin],['Status',c.status]]:activeCategory==='motorcycles'?[['Rok produkcji',c.year],['Przebieg',c.mileage?Number(c.mileage).toLocaleString('pl-PL')+' km':'—'],['Pojemność',c.capacity?c.capacity+' cm³':'—'],['Moc',c.power?c.power+' KM':'—'],['Status',c.status]]:[];
