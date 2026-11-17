@@ -20,4 +20,4 @@ Panel administratora:
 WAŻNE O DANYCH:
 Dane nadal są zapisywane lokalnie w przeglądarce (IndexedDB), tak jak w poprzedniej wersji. Aby przenieść dane między komputerami/przeglądarkami, używaj funkcji „Pobierz pełną kopię” i importu. Samo opublikowanie plików na GitHub Pages nie synchronizuje lokalnej bazy między urządzeniami.
 
-Baza marek i modeli: formularze samochodów i motocykli podpowiadają marki oraz modele z lokalnej listy. Wpisywanie własnej marki/modelu nadal jest możliwe. Baza działa bez internetu.
+Baza marek i modeli: formularz samochodu korzysta z osobnej bazy marek i modeli samochodowych, a formularz motocykla z niezależnej bazy marek i modeli motocyklowych. Listy nie mieszają się między kategoriami. Wpisywanie własnej marki/modelu nadal jest możliwe. Baza działa bez internetu.

@@ -284,17 +284,15 @@ const vehicleCatalog={cars:{'Abarth':['500','595','695','124 Spider'],'Acura':['
 function setupVehicleCatalog(){
  const form=$('carForm'); if(!form)return;
  const make=form.elements.make, model=form.elements.model; if(!make||!model)return;
- make.setAttribute('list','vehicleMakes'); model.setAttribute('list','vehicleModels');
- let a=document.getElementById('vehicleMakes'),b=document.getElementById('vehicleModels');
- if(!a){a=document.createElement('datalist');a.id='vehicleMakes';make.insertAdjacentElement('afterend',a)}
- if(!b){b=document.createElement('datalist');b.id='vehicleModels';model.insertAdjacentElement('afterend',b)}
- function kind(){return activeCategory==='motorcycles'?'motorcycles':'cars'}
- function fillMakes(){a.innerHTML=Object.keys(vehicleCatalog[kind()]).sort((x,y)=>x.localeCompare(y,'pl')).map(x=>`<option value="${x.replaceAll('&','&amp;').replaceAll('"','&quot;')}"></option>`).join('');fillModels()}
- function fillModels(){const key=Object.keys(vehicleCatalog[kind()]).find(x=>x.toLocaleLowerCase('pl')===make.value.trim().toLocaleLowerCase('pl'));const models=key?vehicleCatalog[kind()][key]:[];b.innerHTML=models.map(x=>`<option value="${x.replaceAll('&','&amp;').replaceAll('"','&quot;')}"></option>`).join('')}
- make.addEventListener('input',fillModels); make.addEventListener('change',fillModels);
  const oldOpenForm=openForm;
- window.openForm=function(car){oldOpenForm(car);fillMakes();if(car){make.value=car.make||'';model.value=car.model||'';fillModels()}};
- fillMakes();
+ let currentKind='cars';
+ function listIds(kind){return kind==='motorcycles'?{makes:'motorcycleMakes',models:'motorcycleModels'}:{makes:'carMakes',models:'carModels'}}
+ function getList(id,anchor){let el=document.getElementById(id);if(!el){el=document.createElement('datalist');el.id=id;anchor.insertAdjacentElement('afterend',el)}return el}
+ function fillMakes(kind){const ids=listIds(kind),a=getList(ids.makes,make),b=getList(ids.models,model);make.setAttribute('list',ids.makes);model.setAttribute('list',ids.models);a.innerHTML=Object.keys(vehicleCatalog[kind]).sort((x,y)=>x.localeCompare(y,'pl')).map(x=>`<option value="${x.replaceAll('&','&amp;').replaceAll('"','&quot;')}"></option>`).join('');fillModels(kind);}
+ function fillModels(kind){const ids=listIds(kind),a=document.getElementById(ids.makes),b=getList(ids.models,model);if(!a)return;const key=Object.keys(vehicleCatalog[kind]).find(x=>x.toLocaleLowerCase('pl')===make.value.trim().toLocaleLowerCase('pl'));const models=key?vehicleCatalog[kind][key]:[];b.innerHTML=models.map(x=>`<option value="${x.replaceAll('&','&amp;').replaceAll('"','&quot;')}"></option>`).join('')}
+ make.addEventListener('input',()=>fillModels(currentKind)); make.addEventListener('change',()=>fillModels(currentKind));
+ window.openForm=function(car){oldOpenForm(car);currentKind=activeCategory==='motorcycles'?'motorcycles':'cars';fillMakes(currentKind);if(car){make.value=car.make||'';model.value=car.model||'';fillModels(currentKind)}};
+ currentKind=activeCategory==='motorcycles'?'motorcycles':'cars';fillMakes(currentKind);
 }
 
 function showDetail(id){const c=cars.find(x=>x.id===id);if(!c)return;const title=activeCategory==='other'?c.make:[c.make,c.model,c.version].filter(Boolean).join(' ');const specs=activeCategory==='cars'?[['Rok produkcji',c.year],['Przebieg',c.mileage?Number(c.mileage).toLocaleString('pl-PL')+' km':'—'],['Pojemność',c.capacity?c.capacity+' cm³':'—'],['Moc',c.power?c.power+' KM':'—'],['Paliwo',c.fuel],['Skrzynia biegów',c.gearbox],['Napęd',c.drive],['Nadwozie',c.body],['Kolor',c.color],['Drzwi',c.doors],['Pochodzenie',c.origin],['Pierwsza rejestracja',c.registration],['VIN',c.vin],['Status',c.status]]:activeCategory==='motorcycles'?[['Rok produkcji',c.year],['Przebieg',c.mileage?Number(c.mileage).toLocaleString('pl-PL')+' km':'—'],['Pojemność',c.capacity?c.capacity+' cm³':'—'],['Moc',c.power?c.power+' KM':'—'],['Status',c.status]]:[];
