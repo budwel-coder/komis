@@ -21,4 +21,15 @@ WAŻNE O DANYCH:
 Dane nadal są zapisywane lokalnie w przeglądarce (IndexedDB), tak jak w poprzedniej wersji. Aby przenieść dane między komputerami/przeglądarkami, używaj funkcji „Pobierz pełną kopię” i importu. Samo opublikowanie plików na GitHub Pages nie synchronizuje lokalnej bazy między urządzeniami.
 
 Baza marek i modeli: formularz samochodu korzysta z osobnej bazy marek i modeli samochodowych, a formularz motocykla z niezależnej bazy marek i modeli motocyklowych. Listy nie mieszają się między kategoriami. Wpisywanie własnej marki/modelu nadal jest możliwe. Baza działa bez internetu.
-Test gałęzi komis-test
+
+NOWY ETAP — ODBIÓR OFERTY Z APLIKACJI ROBOCZEJ:
+- netlify/functions/receive-commission.mjs — endpoint do bezpiecznego przyjęcia zdjęć i danych.
+- data/komis.json — dane, które będą wyświetlane przez stronę publiczną po publikacji.
+- szczegółowa instrukcja konfiguracji znajduje się w ODBIOR_KOMISU_NETLIFY.txt.
+- przed pierwszym wdrożeniem wymagane jest skonfigurowanie zmiennych środowiskowych Netlify i wykonanie testu.
+
+
+ODDZIELNE ADRESY:
+- index.html, samochody.html, motocykle.html, inne.html — publiczne podstrony komisu.
+- admin.html — osobny adres panelu administratora (lokalna baza IndexedDB).
+Panel nie jest automatycznie synchronizowany między urządzeniami.
