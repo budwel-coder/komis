@@ -413,7 +413,7 @@ async function loadPublishedCommission(){
 let previewReturnCategory='cars';
 async function showPublic(){previewReturnCategory=activeCategory;pageCategory='all';document.body.dataset.page=pageCategory;$('adminApp').classList.add('hidden');$('publicSite').classList.remove('hidden');document.body.classList.add('public-mode');$('pubYear').textContent=new Date().getFullYear();try{cars=await allFrom(STORE)}catch(err){console.error('Nie udało się pobrać wszystkich ogłoszeń do podglądu:',err)}publicRender();window.scrollTo(0,0) }
 function showAdmin(){ $('publicSite').classList.add('hidden');$('adminApp').classList.remove('hidden');document.body.classList.remove('public-mode');showCategoryPanel(previewReturnCategory);window.scrollTo(0,0) }
-$('previewPublic').onclick=showPublic;if($('backToAdmin'))$('backToAdmin').onclick=showAdmin;$('pubDetailClose').onclick=()=>$('pubDetail').classList.remove('show');
+$('previewPublic').onclick=()=>window.open('./index.html','_blank','noopener');if($('backToAdmin'))$('backToAdmin').onclick=showAdmin;$('pubDetailClose').onclick=()=>$('pubDetail').classList.remove('show');
 ['pubSearch','pubFuel','pubGear','pubSort'].forEach(id=>$(id).addEventListener(id==='pubSearch'?'input':'change',publicRender));
 $('pubInventory').addEventListener('click',e=>{const b=e.target.closest('[data-pub-detail]');if(b){publicDetail(b.dataset.pubDetail)}});
 $('pubInventory').addEventListener('keydown',e=>{const card=e.target.closest('.pub-car[data-pub-detail]');if(card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();publicDetail(card.dataset.pubDetail)}});
