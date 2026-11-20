@@ -340,6 +340,21 @@ function publicDetail(id){const c=cars.find(x=>x.id===id);if(!c)return;const tit
  $('pubDetailContent').innerHTML=`<div class="pub-detail-grid"><div><img class="pub-detail-main" id="pubMainPhoto" src="${c.photos?.[0]||''}" style="${c.photos?.length?'':'display:none'}" alt="${esc(title)}"><div class="pub-thumbs">${(c.photos||[]).map((p,i)=>`<img src="${p}" data-pub-photo="${i}" alt="Miniatura ${i+1}">`).join('')}</div></div><div><div class="pub-kicker">${esc(c.status||'Ogłoszenie')}</div><h2 style="font-size:30px;margin:8px 0">${esc(title)}</h2>${pageCategory!=='other'?`<div class="pub-meta">${esc([c.year,c.body].filter(Boolean).join(' · '))}</div>`:''}<div class="pub-price">${c.price?money(c.price):'Cena do uzgodnienia'}</div><p style="color:#c0cada;line-height:1.75">${esc(c.description||'Opis ogłoszenia zostanie uzupełniony.')}</p><button class="pub-primary" onclick="alert('Skontaktuj się z nami, aby uzyskać więcej informacji.')">Zapytaj o ogłoszenie</button></div></div>${specs.length?`<div class="pub-spec-grid">${specs.map(([a,b])=>`<div class="pub-spec"><small>${a}</small><b>${esc(b||'—')}</b></div>`).join('')}</div>`:''}${pageCategory==='cars'?`<h3>Wyposażenie</h3><p style="color:#c0cada;white-space:pre-line">${esc(equipmentDisplay(c)||'Nie podano.')}</p><p style="color:#8292a8;font-size:11px">VIN nie jest wyświetlany w publicznej karcie pojazdu.</p>`:''}`;
  $('pubDetail').classList.add('show');$('pubDetailContent').querySelectorAll('[data-pub-photo]').forEach(img=>img.onclick=()=>{$('pubMainPhoto').src=c.photos[Number(img.dataset.pubPhoto)]});
 }
+async function loadPublishedPublicData(){
+ try{
+  const response=await fetch('./data/komis.json? aktualizacja='+Date.now(),{cache:'no-store'});
+  if(!response.ok) throw new Error('Brak opublikowanej bazy');
+  const published=await response.json();
+  if(published?.format!=='autokomis-published-v1'||!Array.isArray(published.cars)) throw new Error('Nieprawidłowy format bazy');
+  cars=published.cars.filter(c=>!c.category||c.category==='cars');
+  siteSettings={...defaultSettings,...(published.siteSettings||{})};
+  pageCategory='cars';activeCategory='cars';applySiteSettings();publicRender();
+ }catch(err){
+  // W trybie lokalnym lub przed pierwszą publikacją pokaż dane z IndexedDB.
+  console.info('Używam lokalnej bazy podglądu:',err.message);
+  await load();publicRender();
+ }
+}
 function showPublic(){activeCategory='cars';pageCategory='cars';document.body.dataset.page='cars';$('adminApp').classList.add('hidden');$('publicSite').classList.remove('hidden');document.body.classList.add('public-mode');$('pubYear').textContent=new Date().getFullYear();publicRender();window.scrollTo(0,0) }
 function showAdmin(){activeCategory='cars';pageCategory='cars';$('publicSite').classList.add('hidden');$('adminApp').classList.remove('hidden');document.body.classList.remove('public-mode');showCarsPanel();load();window.scrollTo(0,0) }
 $('previewPublic').onclick=showPublic;$('pubDetailClose').onclick=()=>$('pubDetail').classList.remove('show');
@@ -363,7 +378,7 @@ $('deviceMobile').onclick=()=>{$('editorLive').classList.add('mobile');$('device
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-wrap.show').forEach(m=>m.classList.remove('show'))});
 setupVehicleCatalog();
-openDB().then(async x=>{db=x;activeCategory='cars';pageCategory='cars';document.body.dataset.page='cars';await loadSettings();if(location.pathname.toLowerCase().endsWith('/admin.html')||location.pathname.toLowerCase().endsWith('admin.html')){await load();showAdmin();await makeSnapshot('Kopia początkowa');updateBackupStatus()}else{try{const response=await fetch('/data/komis.json',{cache:'no-store'});if(!response.ok)throw new Error('Nie znaleziono opublikowanej bazy samochodów (data/komis.json).');const published=await response.json();if(published.format!=='autokomis-published-v1'||!Array.isArray(published.cars))throw new Error('Plik data/komis.json ma nieprawidłowy format.');cars=published.cars.filter(c=>!c.category||c.category==='cars');siteSettings={...defaultSettings,...(published.siteSettings||{})};applySiteSettings();showPublic()}catch(err){cars=[];showPublic();$('pubInventory').innerHTML='<div class="pub-empty">Nie udało się wczytać aktualnej oferty. '+esc(err.message)+'</div>';console.error('Błąd pobierania opublikowanej bazy:',err)}}}).catch(err=>{alert('Przeglądarka nie udostępnia lokalnej bazy danych. Otwórz stronę przez serwer lokalny lub hosting.');console.error(err)});
+openDB().then(async x=>{db=x;activeCategory='cars';pageCategory='cars';document.body.dataset.page='cars';await loadSettings();await load();if(location.pathname.toLowerCase().endsWith('/admin.html')||location.pathname.toLowerCase().endsWith('admin.html')){showAdmin();await makeSnapshot('Kopia początkowa');updateBackupStatus()}else{showPublic();await loadPublishedPublicData()}}).catch(err=>{alert('Przeglądarka nie udostępnia lokalnej bazy danych. Otwórz stronę przez serwer lokalny lub hosting.');console.error(err)});
 })();
 </script>
 </body>

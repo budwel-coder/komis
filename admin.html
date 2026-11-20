@@ -190,7 +190,7 @@ body.public-mode{background:#0c1424;color:#f4f6fb;font-family:Arial,sans-serif}
 
 
 <div id="publicSite" class="hidden">
- <header class="pub-header"><div class="pub-logo"><span id="pubLogoName">Komis u brata</span><small id="pubLogoTag">SPRAWDŹ NASZE OFERTY</small></div><nav class="pub-nav"><a href="index.html?widok=klienta">Samochody</a><a href="#pub-about">O komisie</a><a href="#pub-contact">Kontakt</a><button onclick="document.getElementById('pub-offer').scrollIntoView({behavior:'smooth'})">Zobacz ofertę ↓</button></nav></header>
+ <header class="pub-header"><div class="pub-logo"><span id="pubLogoName">Komis u brata</span><small id="pubLogoTag">SPRAWDŹ NASZE OFERTY</small></div><nav class="pub-nav"><a href="#pub-about">O komisie</a><a href="#pub-contact">Kontakt</a><button onclick="document.getElementById('pub-offer').scrollIntoView({behavior:'smooth'})">Zobacz ofertę ↓</button></nav></header>
  <section class="pub-hero"><div class="pub-kicker">Komis samochodowy</div><h1 id="pubHeroTitle">Znajdź samochód, który pasuje do Ciebie.</h1><p id="pubHeroIntro">Przejrzyj aktualne propozycje, porównaj parametry i wybierz auto dla siebie.</p><div class="pub-hero-actions"><button class="pub-primary" onclick="document.getElementById('pub-offer').scrollIntoView({behavior:'smooth'})">Przeglądaj samochody</button><button class="pub-secondary" onclick="document.getElementById('pub-contact').scrollIntoView({behavior:'smooth'})">Informacje kontaktowe</button></div></section>
  <section class="pub-wrap" id="pub-offer"><div class="pub-section-head"><div><div class="pub-kicker">Nasza oferta</div><h2>Dostępne samochody</h2></div><p>Wybierz interesujące Cię parametry. Kliknij ofertę, aby zobaczyć pełną kartę pojazdu.</p></div><div class="pub-filters" id="pubFilters"><input id="pubSearch" placeholder="Szukaj marki lub modelu"><select id="pubFuel"><option value="all">Każde paliwo</option><option>Benzyna</option><option>Diesel</option><option>LPG</option><option>Hybryda</option><option>Elektryczny</option></select><select id="pubGear"><option value="all">Każda skrzynia</option><option>Manualna</option><option>Automatyczna</option></select><select id="pubSort"><option value="new">Najnowsze</option><option value="cheap">Cena: od najniższej</option><option value="expensive">Cena: od najwyższej</option><option value="year">Rok: od najnowszego</option></select></div><div class="pub-inventory" id="pubInventory"></div></section>
  <section class="pub-about" id="pub-about"><div class="pub-wrap pub-about-grid"><div><div class="pub-kicker">Poznaj nas</div><h2 id="pubAboutTitle">Komis u brata</h2><p id="pubAboutText">To miejsce na krótką historię komisu, doświadczenie i informacje o tym, jak pomagamy znaleźć odpowiedni samochód.</p></div><div><div class="pub-kicker">Informacje</div><p><b>Rok rozpoczęcia działalności:</b> <span id="pubSince">Do uzupełnienia</span></p><p><b>Lokalizacja:</b> <span id="pubAddress">Do uzupełnienia</span></p><p><b>Zakres działalności:</b> <span id="pubScope">Sprzedaż samochodów używanych</span></p></div></div></section>
@@ -340,6 +340,21 @@ function publicDetail(id){const c=cars.find(x=>x.id===id);if(!c)return;const tit
  $('pubDetailContent').innerHTML=`<div class="pub-detail-grid"><div><img class="pub-detail-main" id="pubMainPhoto" src="${c.photos?.[0]||''}" style="${c.photos?.length?'':'display:none'}" alt="${esc(title)}"><div class="pub-thumbs">${(c.photos||[]).map((p,i)=>`<img src="${p}" data-pub-photo="${i}" alt="Miniatura ${i+1}">`).join('')}</div></div><div><div class="pub-kicker">${esc(c.status||'Ogłoszenie')}</div><h2 style="font-size:30px;margin:8px 0">${esc(title)}</h2>${pageCategory!=='other'?`<div class="pub-meta">${esc([c.year,c.body].filter(Boolean).join(' · '))}</div>`:''}<div class="pub-price">${c.price?money(c.price):'Cena do uzgodnienia'}</div><p style="color:#c0cada;line-height:1.75">${esc(c.description||'Opis ogłoszenia zostanie uzupełniony.')}</p><button class="pub-primary" onclick="alert('Skontaktuj się z nami, aby uzyskać więcej informacji.')">Zapytaj o ogłoszenie</button></div></div>${specs.length?`<div class="pub-spec-grid">${specs.map(([a,b])=>`<div class="pub-spec"><small>${a}</small><b>${esc(b||'—')}</b></div>`).join('')}</div>`:''}${pageCategory==='cars'?`<h3>Wyposażenie</h3><p style="color:#c0cada;white-space:pre-line">${esc(equipmentDisplay(c)||'Nie podano.')}</p><p style="color:#8292a8;font-size:11px">VIN nie jest wyświetlany w publicznej karcie pojazdu.</p>`:''}`;
  $('pubDetail').classList.add('show');$('pubDetailContent').querySelectorAll('[data-pub-photo]').forEach(img=>img.onclick=()=>{$('pubMainPhoto').src=c.photos[Number(img.dataset.pubPhoto)]});
 }
+async function loadPublishedPublicData(){
+ try{
+  const response=await fetch('./data/komis.json? aktualizacja='+Date.now(),{cache:'no-store'});
+  if(!response.ok) throw new Error('Brak opublikowanej bazy');
+  const published=await response.json();
+  if(published?.format!=='autokomis-published-v1'||!Array.isArray(published.cars)) throw new Error('Nieprawidłowy format bazy');
+  cars=published.cars.filter(c=>!c.category||c.category==='cars');
+  siteSettings={...defaultSettings,...(published.siteSettings||{})};
+  pageCategory='cars';activeCategory='cars';applySiteSettings();publicRender();
+ }catch(err){
+  // W trybie lokalnym lub przed pierwszą publikacją pokaż dane z IndexedDB.
+  console.info('Używam lokalnej bazy podglądu:',err.message);
+  await load();publicRender();
+ }
+}
 function showPublic(){activeCategory='cars';pageCategory='cars';document.body.dataset.page='cars';$('adminApp').classList.add('hidden');$('publicSite').classList.remove('hidden');document.body.classList.add('public-mode');$('pubYear').textContent=new Date().getFullYear();publicRender();window.scrollTo(0,0) }
 function showAdmin(){activeCategory='cars';pageCategory='cars';$('publicSite').classList.add('hidden');$('adminApp').classList.remove('hidden');document.body.classList.remove('public-mode');showCarsPanel();load();window.scrollTo(0,0) }
 $('previewPublic').onclick=showPublic;$('pubDetailClose').onclick=()=>$('pubDetail').classList.remove('show');
@@ -363,7 +378,7 @@ $('deviceMobile').onclick=()=>{$('editorLive').classList.add('mobile');$('device
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-wrap.show').forEach(m=>m.classList.remove('show'))});
 setupVehicleCatalog();
-openDB().then(async x=>{db=x;activeCategory='cars';pageCategory='cars';document.body.dataset.page='cars';await loadSettings();await load();if(location.pathname.toLowerCase().endsWith('/admin.html')||location.pathname.toLowerCase().endsWith('admin.html')){showAdmin();await makeSnapshot('Kopia początkowa');updateBackupStatus()}else{showPublic()}}).catch(err=>{alert('Przeglądarka nie udostępnia lokalnej bazy danych. Otwórz stronę przez serwer lokalny lub hosting.');console.error(err)});
+openDB().then(async x=>{db=x;activeCategory='cars';pageCategory='cars';document.body.dataset.page='cars';await loadSettings();await load();if(location.pathname.toLowerCase().endsWith('/admin.html')||location.pathname.toLowerCase().endsWith('admin.html')){showAdmin();await makeSnapshot('Kopia początkowa');updateBackupStatus()}else{showPublic();await loadPublishedPublicData()}}).catch(err=>{alert('Przeglądarka nie udostępnia lokalnej bazy danych. Otwórz stronę przez serwer lokalny lub hosting.');console.error(err)});
 })();
 </script>
 </body>
