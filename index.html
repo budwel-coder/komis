@@ -53,7 +53,7 @@ h1{font-size:26px;letter-spacing:-.03em;margin:0 0 4px}.sub{color:var(--muted)}
 .notice{background:#fff8e8;color:#80540d;border:1px solid #f0dfb8;padding:11px 13px;border-radius:9px;font-size:12px;margin-top:18px}
 .hidden{display:none!important}
 .equipment-checklist{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:9px}.equipment-checklist label{display:flex;align-items:flex-start;gap:7px;padding:8px;border:1px solid #e1e6ee;border-radius:7px;background:#fbfcfe;font-size:12px;font-weight:550!important;margin:0!important}.equipment-checklist input{width:auto!important;margin:2px 0 0;flex:0 0 auto}.category-note{padding:12px;border-radius:8px;background:#f4f6f9;color:#536071;font-size:12px;margin:12px 0}@media(max-width:700px){.equipment-checklist{grid-template-columns:1fr 1fr}}
-body[data-page="motorcycles"] #publicSite .pub-hero::before{background-image:url("assets/scigacz.svg");background-position:center right;background-size:cover;opacity:.62}body[data-page="motorcycles"] #publicSite .pub-hero{background:radial-gradient(ellipse at 78% 15%,#34465f 0,transparent 45%),linear-gradient(115deg,#101d32,#0b1424 68%)}body[data-page="other"] #publicSite .pub-hero::before{background-image:none;opacity:0}body[data-page="other"] #publicSite .pub-hero{background:linear-gradient(115deg,#17243a,#0b1424 75%)}
+body[data-page="motorcycles"] #publicSite .pub-hero::before{background-image:url("assets/scigacz.webp");background-position:center right;background-size:cover;opacity:.62}body[data-page="motorcycles"] #publicSite .pub-hero{background:radial-gradient(ellipse at 78% 15%,#34465f 0,transparent 45%),linear-gradient(115deg,#101d32,#0b1424 68%)}body[data-page="other"] #publicSite .pub-hero::before{background-image:none;opacity:0}body[data-page="other"] #publicSite .pub-hero{background:linear-gradient(115deg,#17243a,#0b1424 75%)}
 /* Publiczna witryna komisu */
 body.public-mode{background:#0c1424;color:#f4f6fb;font-family:Arial,sans-serif}
 #publicSite{min-height:100vh;background:#0b1424;color:#f4f6fb;--orange:#ff7a1a;--navy:#101d32}
@@ -191,7 +191,7 @@ body.public-mode{background:#0c1424;color:#f4f6fb;font-family:Arial,sans-serif}
  <section class="pub-wrap" id="pub-contact"><div class="pub-contact"><div><div class="pub-kicker">Masz pytania?</div><h2>Skontaktuj się z nami</h2><p id="pubContactIntro" style="color:#aab7c9">Dane kontaktowe do uzupełnienia.</p><p id="pubContactAddress"></p><p><a class="pub-contact-phone-link" id="pubContactPhone" style="color:#ff7a1a"></a><br><a class="pub-contact-phone-link" id="pubContactPhone2" style="color:#ff7a1a"></a></p><p id="pubContactEmail"></p><p id="pubContactSocial"></p></div><div><a class="pub-primary" id="pubMapLink" href="#" target="_blank" rel="noopener">Mapa dojazdu ↗</a></div></div></section>
  <footer class="pub-footer"><span>© <span id="pubYear"></span> <span id="pubFooterName">Komis u brata</span></span></footer>
  <div class="pub-detail" id="pubDetail"><div class="pub-detail-card"><div class="pub-detail-top"><b>Szczegóły samochodu</b><button class="pub-secondary" id="pubDetailClose">Zamknij ✕</button></div><div class="pub-detail-content" id="pubDetailContent"></div></div></div>
- <button class="btn primary pub-admin-back" id="backToAdmin">← Wróć do panelu</button>
+ 
 </div>
 
 <div class="modal-wrap" id="formWrap">
@@ -319,7 +319,7 @@ function publicDetail(id){const c=cars.find(x=>x.id===id);if(!c)return;const tit
 }
 function showPublic(){pageCategory=activeCategory;document.body.dataset.page=pageCategory;$('adminApp').classList.add('hidden');$('publicSite').classList.remove('hidden');document.body.classList.add('public-mode');$('pubYear').textContent=new Date().getFullYear();publicRender();window.scrollTo(0,0) }
 function showAdmin(){ $('publicSite').classList.add('hidden');$('adminApp').classList.remove('hidden');document.body.classList.remove('public-mode');showCategoryPanel(pageCategory);window.scrollTo(0,0) }
-$('previewPublic').onclick=showPublic;$('backToAdmin').onclick=showAdmin;$('pubDetailClose').onclick=()=>$('pubDetail').classList.remove('show');
+if($('previewPublic'))$('previewPublic').onclick=showPublic;$('pubDetailClose').onclick=()=>$('pubDetail').classList.remove('show');
 ['pubSearch','pubFuel','pubGear','pubSort'].forEach(id=>$(id).addEventListener(id==='pubSearch'?'input':'change',publicRender));
 $('pubInventory').addEventListener('click',e=>{const b=e.target.closest('[data-pub-detail]');if(b)publicDetail(b.dataset.pubDetail)});
 $('pubInventory').addEventListener('keydown',e=>{const card=e.target.closest('.pub-car[data-pub-detail]');if(card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();publicDetail(card.dataset.pubDetail)}});
@@ -340,7 +340,7 @@ $('deviceMobile').onclick=()=>{$('editorLive').classList.add('mobile');$('device
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-wrap.show').forEach(m=>m.classList.remove('show'))});
 setupVehicleCatalog();
-openDB().then(async x=>{db=x;activeCategory=pageCategory;await loadSettings();await load();const customerView=new URLSearchParams(window.location.search).get('widok')==='klienta';if(customerView||pageCategory!=='cars'){showPublic()}else{showAdmin()} await makeSnapshot('Kopia początkowa');updateBackupStatus()}).catch(err=>{alert('Przeglądarka nie udostępnia lokalnej bazy danych. Otwórz plik w Safari lub Firefox.');console.error(err)});
+openDB().then(async x=>{db=x;activeCategory=pageCategory;await loadSettings();await load();showPublic(); await makeSnapshot('Kopia początkowa');updateBackupStatus()}).catch(err=>{alert('Przeglądarka nie udostępnia lokalnej bazy danych. Otwórz plik w Safari lub Firefox.');console.error(err)});
 })();
 </script>
 </body>
