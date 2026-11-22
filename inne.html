@@ -340,7 +340,7 @@ $('deviceMobile').onclick=()=>{$('editorLive').classList.add('mobile');$('device
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-wrap.show').forEach(m=>m.classList.remove('show'))});
 setupVehicleCatalog();
-openDB().then(async x=>{db=x;activeCategory=pageCategory;await loadSettings();await load();showPublic(); await makeSnapshot('Kopia początkowa');updateBackupStatus()}).catch(err=>{alert('Przeglądarka nie udostępnia lokalnej bazy danych. Otwórz plik w Safari lub Firefox.');console.error(err)});
+openDB().then(async x=>{db=x;activeCategory=pageCategory;try{const response=await fetch('./data/commission.json',{cache:'no-store'});if(response.ok){const published=await response.json();if(published&&Array.isArray(published.cars)){await replaceAllData({cars:published.cars,siteSettings:published.siteSettings||{}})}}}catch(err){console.warn('Nie udało się pobrać opublikowanych danych; używam lokalnej kopii.',err)}await loadSettings();await load();showPublic(); await makeSnapshot('Kopia początkowa');updateBackupStatus()}).catch(err=>{alert('Przeglądarka nie udostępnia lokalnej bazy danych. Otwórz plik w Safari lub Firefox.');console.error(err)});
 })();
 </script>
 </body>
