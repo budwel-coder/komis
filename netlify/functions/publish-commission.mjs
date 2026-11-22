@@ -42,7 +42,7 @@ export default async (req) => {
         return reply(400, { error: 'Jedna partia musi zawierać od 1 do 8 zdjęć.' }, headers);
       const result = [];
       for (const file of input.files) {
-        if (!file || typeof file.path !== 'string' || !/^galeria\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_.-]+$/.test(file.path) || typeof file.content !== 'string' || file.content.length > 5_000_000)
+        if (!file || typeof file.path !== 'string' || !/^galeria\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_.-]+$/.test(file.path) || typeof file.content !== 'string' || file.content.length > 3_400_000)
           return reply(400, { error: 'Nieprawidłowy plik zdjęcia.' }, headers);
         const blob = await gh('/git/blobs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: file.content, encoding: 'base64' }) });
         result.push({ path: file.path, sha: blob.sha });
@@ -51,11 +51,11 @@ export default async (req) => {
     }
 
     if (input.action === 'publish') {
-      if (typeof input.baseCommit !== 'string' || typeof input.baseTree !== 'string' || !Array.isArray(input.files) || !input.data || !Array.isArray(input.data.cars))
+      if (typeof input.baseCommit !== 'string' || !Array.isArray(input.files) || !input.data || !Array.isArray(input.data.cars))
         return reply(400, { error: 'Niekompletne dane publikacji.' }, headers);
       const ref = await gh(`/git/ref/heads/${encodeURIComponent(branch)}`);
       if (ref.object.sha !== input.baseCommit) return reply(409, { error: 'Repozytorium zmieniło się od rozpoczęcia publikacji. Odśwież panel i spróbuj ponownie.' }, headers);
-      const tree = await gh(`/git/trees/${input.baseTree}?recursive=1`);
+      const tree = await gh(`/git/trees/${input.baseCommit}?recursive=1`);
       if (tree.truncated) return reply(413, { error: 'Repozytorium jest zbyt duże do bezpiecznej aktualizacji.' }, headers);
       const entries = tree.tree.filter(x => !x.path.startsWith('galeria/')).map(x => ({ path: x.path, mode: x.mode, type: x.type, sha: x.sha }));
       // Explicit null-SHA entries remove stale images from the previous publication.
@@ -70,7 +70,7 @@ export default async (req) => {
       const manifest = JSON.stringify(input.data, null, 2);
       const manifestBlob = await gh('/git/blobs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: manifest, encoding: 'utf-8' }) });
       entries.push({ path: 'data/commission.json', mode: '100644', type: 'blob', sha: manifestBlob.sha });
-      const newTree = await gh('/git/trees', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ base_tree: input.baseTree, tree: entries }) });
+      const newTree = await gh('/git/trees', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ base_tree: tree.sha, tree: entries }) });
       const commit = await gh('/git/commits', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: `Aktualizacja komisu (${input.data.cars.length} ogłoszeń)`, tree: newTree.sha, parents: [input.baseCommit] }) });
       await gh(`/git/refs/heads/${encodeURIComponent(branch)}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sha: commit.sha, force: false }) });
       return reply(200, { ok: true, commit: commit.sha, count: input.data.cars.length, photos: input.files.length, branch }, headers);
