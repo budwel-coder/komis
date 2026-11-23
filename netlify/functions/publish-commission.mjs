@@ -38,8 +38,8 @@ export default async (req) => {
     }
 
     if (input.action === 'blobs') {
-      if (!Array.isArray(input.files) || input.files.length < 1 || input.files.length > 8)
-        return reply(400, { error: 'Jedna partia musi zawierać od 1 do 8 zdjęć.' }, headers);
+      if (!Array.isArray(input.files) || input.files.length < 1 || input.files.length > 1)
+        return reply(400, { error: 'Jedno żądanie może zawierać tylko jedno zdjęcie.' }, headers);
       const result = [];
       for (const file of input.files) {
         if (!file || typeof file.path !== 'string' || !/^galeria\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_.-]+$/.test(file.path) || typeof file.content !== 'string' || file.content.length > 5_000_000)
