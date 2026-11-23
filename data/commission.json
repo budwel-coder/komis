@@ -1,0 +1,106 @@
+{
+  "format": "autokomis-public-v1",
+  "created": "2026-11-23T18:50:40.761Z",
+  "cars": [
+    {
+      "make": "Audi",
+      "model": "a4",
+      "version": "S line",
+      "year": "2008",
+      "price": "60000",
+      "mileage": "200000",
+      "capacity": "1900",
+      "power": "150",
+      "fuel": "Benzyna",
+      "gearbox": "Manualna",
+      "drive": "Na przednie koła",
+      "body": "Hatchback",
+      "color": "Niebieski",
+      "doors": "5",
+      "origin": "",
+      "registration": "2008",
+      "vin": "vvvv",
+      "status": "Dostępny",
+      "equipment": "Automatyczne światła, Monitorowanie martwego pola, Asystent parkowania",
+      "description": "",
+      "id": "5d6a6d5b-8f1c-49d9-b98d-c70b06a44c3c",
+      "category": "cars",
+      "created": 1795339280663,
+      "photos": [
+        "./galeria/5d6a6d5b-8f1c-49d9-b98d-c70b06a44c3c/photo-01.webp"
+      ],
+      "thumbnails": [
+        "./galeria/5d6a6d5b-8f1c-49d9-b98d-c70b06a44c3c/thumb-01.webp"
+      ],
+      "equipmentItems": [
+        "Automatyczne światła",
+        "Monitorowanie martwego pola",
+        "Asystent parkowania"
+      ],
+      "equipmentExtra": ""
+    },
+    {
+      "make": "Suzuki",
+      "model": "V-Strom 800",
+      "version": "",
+      "year": "2011",
+      "price": "1000",
+      "mileage": "",
+      "capacity": "800",
+      "power": "",
+      "fuel": "Benzyna",
+      "gearbox": "Manualna",
+      "drive": "Na przednie koła",
+      "body": "Hatchback",
+      "color": "",
+      "doors": "5",
+      "origin": "",
+      "registration": "",
+      "vin": "",
+      "status": "Dostępny",
+      "equipment": "",
+      "description": "",
+      "id": "72d9ca5c-81d3-4d3c-b82a-ae5886904593",
+      "category": "motorcycles",
+      "created": 1795347913902,
+      "photos": [],
+      "thumbnails": [],
+      "equipmentItems": [],
+      "equipmentExtra": ""
+    },
+    {
+      "make": "kawsaki",
+      "model": "ninija",
+      "version": "",
+      "year": "2010",
+      "price": "10000",
+      "mileage": "10000",
+      "capacity": "650",
+      "power": "150",
+      "fuel": "Benzyna",
+      "gearbox": "Manualna",
+      "drive": "Na przednie koła",
+      "body": "Hatchback",
+      "color": "",
+      "doors": "5",
+      "origin": "",
+      "registration": "",
+      "vin": "",
+      "status": "Dostępny",
+      "equipment": "",
+      "description": "",
+      "id": "acaf78ca-e7d3-45d3-ac3b-8997869315a9",
+      "category": "motorcycles",
+      "created": 1795339353534,
+      "photos": [
+        "./galeria/acaf78ca-e7d3-45d3-ac3b-8997869315a9/photo-01.webp"
+      ],
+      "thumbnails": [
+        "./galeria/acaf78ca-e7d3-45d3-ac3b-8997869315a9/thumb-01.webp"
+      ],
+      "equipmentItems": [],
+      "equipmentExtra": ""
+    }
+  ],
+  "siteSettings": {}
+}
