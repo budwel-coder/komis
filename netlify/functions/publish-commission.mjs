@@ -55,7 +55,10 @@ export default async (req) => {
         return reply(400, { error: 'Niekompletne dane publikacji.' }, headers);
       const ref = await gh(`/git/ref/heads/${encodeURIComponent(branch)}`);
       if (ref.object.sha !== input.baseCommit) return reply(409, { error: 'Repozytorium zmieniło się od rozpoczęcia publikacji. Odśwież panel i spróbuj ponownie.' }, headers);
-      const tree = await gh(`/git/trees/${input.baseCommit}?recursive=1`);
+      // baseCommit jest SHA commita, a endpoint /git/trees wymaga SHA drzewa.
+      // Pobieramy więc commit i dopiero jego tree.sha przekazujemy do Git Trees API.
+      const baseCommitData = await gh(`/git/commits/${input.baseCommit}`);
+      const tree = await gh(`/git/trees/${baseCommitData.tree.sha}?recursive=1`);
       if (tree.truncated) return reply(413, { error: 'Repozytorium jest zbyt duże do bezpiecznej aktualizacji.' }, headers);
       const entries = tree.tree.filter(x => !x.path.startsWith('galeria/')).map(x => ({ path: x.path, mode: x.mode, type: x.type, sha: x.sha }));
       // Explicit null-SHA entries remove stale images from the previous publication.
